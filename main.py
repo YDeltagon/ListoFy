@@ -1,9 +1,10 @@
-### import
+
+#* Import
 import requests
 from requests.structures import CaseInsensitiveDict
 
 
-### Spotify MARKET check
+#* Spotify MARKET check
 def user_market():
     market_check = ["FR", "EN", "GB"]
     in_user_market = 0
@@ -43,50 +44,76 @@ def user_market():
         else: 
             print("WTF ? (not save)")
     return in_user_market
-        
-### Spotify OAUTH check
+
+
+#* Spotify OAUTH check
 def user_oauth():
     oauth_verified = 0
-    try: 
-        f_user_oauth= open("user_oauth.txt", "r")
-        in_user_oauth = f_user_oauth.read()
-        url = "https://api.spotify.com/v1/me"
-        headers = CaseInsensitiveDict()
-        headers["Accept"] = "application/json"
-        headers["Content-Type"] = "application/json"
-        headers["Authorization"] = "Bearer " + in_user_oauth
-        if requests.get(url, headers=headers).status_code == 200:
-            print('Success !')
-            oauth_verified = 1
-        elif requests.get(url, headers=headers).status_code == 404:
-            print('Not Found.')
-        elif requests.get(url, headers=headers).status_code == 401:
-            print('Unauthorized.')
-        else:
-            print('WTF bro ?')
-    except:
-        while not oauth_verified == 1:
+    if oauth_verified == 0 :
+        try: 
+            f_user_oauth = open("user_oauth.txt", "r")
+            in_user_oauth = f_user_oauth.read()
+            url = "https://api.spotify.com/v1/me"
+            headers = CaseInsensitiveDict()
+            headers["Accept"] = "application/json"
+            headers["Content-Type"] = "application/json"
+            headers["Authorization"] = "Bearer " + in_user_oauth
+            if requests.get(url, headers = headers).status_code == 200:
+                print('Success !')
+                oauth_verified = 1
+            elif requests.get(url, headers = headers).status_code == 404:
+                print('Not Found.')
+                oauth_verified = 5
+            elif requests.get(url, headers = headers).status_code == 401:
+                print('Unauthorized.')
+                oauth_verified = 5
+            else:
+                print('WTF bro ?')
+                oauth_verified = 5
+        except:
             in_user_oauth = input("What is your OAuth Token ? ")
             url = "https://api.spotify.com/v1/me"
             headers = CaseInsensitiveDict()
             headers["Accept"] = "application/json"
             headers["Content-Type"] = "application/json"
             headers["Authorization"] = "Bearer " + in_user_oauth
-            if requests.get(url, headers=headers).status_code == 200:
+            if requests.get(url, headers = headers).status_code == 200:
                 print('Success !')
                 oauth_verified = 1
-            elif requests.get(url, headers=headers).status_code == 404:
+            elif requests.get(url, headers = headers).status_code == 404:
                 print('Not Found.')
-            elif requests.get(url, headers=headers).status_code == 401:
+                oauth_verified = 5
+            elif requests.get(url, headers = headers).status_code == 401:
                 print('Unauthorized.')
+                oauth_verified = 5
             else:
                 print('WTF bro ?')
+                oauth_verified = 5
+    while oauth_verified == 5 :
+        in_user_oauth = input("What is your OAuth Token ? ")
+        url = "https://api.spotify.com/v1/me"
+        headers = CaseInsensitiveDict()
+        headers["Accept"] = "application/json"
+        headers["Content-Type"] = "application/json"
+        headers["Authorization"] = "Bearer " + in_user_oauth
+        if requests.get(url, headers = headers).status_code == 200:
+            print('Success !')
+            oauth_verified = 1
+        elif requests.get(url, headers = headers).status_code == 404:
+            print('Not Found.')
+            oauth_verified = 5
+        elif requests.get(url, headers = headers).status_code == 401:
+            print('Unauthorized.')
+            oauth_verified = 5
+        else:
+            print('WTF bro ?')
+            oauth_verified = 5
     return in_user_oauth
 
 
-### Auth on API Spotify
-user_market=user_market()
-user_oauth=user_oauth()
+#* Auth on API Spotify
+user_market = user_market()
+user_oauth = user_oauth()
 
 print(user_market)
 print(user_oauth)
