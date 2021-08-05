@@ -2,9 +2,15 @@
 Organize your playlist by genre / artists / moods and mark the best of them
 
 ## V0.1.x
+- V0.1.3
+    - Add a script to import all_playlist_user
+    - Print all info that we recover (all_liked_track / all_playlist_user)
+    - Del all variable off
+    - Delete separated script
+    - Replace exec with a def fonc
 - V0.1.2
     - Separated my script in a file
-    - Print the list of all licket track
+    - Print the list of all liked track
 - V0.1.1
     - Extract NAME/ALBUM/ARTIST and ID of your liked track
     - Create a list of all liked track
