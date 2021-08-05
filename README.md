@@ -2,7 +2,7 @@
 Organize your playlist by genre / artists / moods and mark the best of them
 
 ## V0.1.x
-- V0.1.0
+- V0.1.1
     - Extract NAME/ALBUM/ARTIST and ID of your liked track
     - Create a list of all liked track
 - V0.1.0
