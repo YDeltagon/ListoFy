@@ -3,9 +3,12 @@ Organize your playlist by genre / artists / moods and mark the best of them
 
 ## V0.1.x
 - V0.1.0
+    - Extract NAME/ALBUM/ARTIST and ID of your liked track
+    - Create a list of all liked track
+- V0.1.0
     - Based now on [Plamere/SpotiPY](https://github.com/plamere/spotipy) (thanks)
     - Rewrite all my code
-    - Extract all like music on my account
+    - Extract all like track on my account
 ## V0.0.x
 - V0.0.2 - Last standalone version
     - Debug
