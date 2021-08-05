@@ -2,6 +2,9 @@
 Organize your playlist by genre / artists / moods and mark the best of them
 
 ## V0.1.x
+- V0.1.2
+    - Separated my script in a file
+    - Print the list of all licket track
 - V0.1.1
     - Extract NAME/ALBUM/ARTIST and ID of your liked track
     - Create a list of all liked track
