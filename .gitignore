@@ -1,3 +1,5 @@
 WIKI/
-user_market.txt
-user_oauth.txt
+
+APP_CLIENT_ID.txt
+APP_CLIENT_SECRET.txt
+.cache
