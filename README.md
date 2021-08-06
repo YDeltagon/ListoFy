@@ -1,6 +1,13 @@
 # ListoFy
 Organize your playlist by genre / artists / moods and mark the best of them
 
+## V0.2.x
+- V0.2.0
+    - Add a GUI with [PySimpleGUI/PySimpleGUI](https://github.com/PySimpleGUI/PySimpleGUI) (thanks)
+    - Save all_liked_track and all_playlist_user in a txt files
+    - Firt windows "Update your Spotify info ?"
+    - Fix the oauth
+    - 
 ## V0.1.x
 - V0.1.4
     - Print ID + Playlist + Spotify_ID

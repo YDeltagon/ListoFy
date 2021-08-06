@@ -1,85 +1,192 @@
 
-#* Import
+# * Import
 import spotipy
-import time
+import json
+import PySimpleGUI as sg
+import os.path
 from fileinput import close
 from spotipy.oauth2 import SpotifyOAuth
 
-#* Import APP_CLIENT_ID and SECRET
-f_APP_CLIENT_ID = open('APP_CLIENT_ID.txt', 'r')
-APP_CLIENT_ID = f_APP_CLIENT_ID.read()
-f_APP_CLIENT_ID = close
-f_APP_CLIENT_SECRET = open('APP_CLIENT_SECRET.txt', 'r')
-APP_CLIENT_SECRET = f_APP_CLIENT_SECRET.read()
-f_APP_CLIENT_SECRET = close
-
-#* All liked track
-def results_all_liked_track(client_id, client_secret):
-    #* Authentification
-    sp = spotipy.Spotify(auth_manager = SpotifyOAuth(client_id = client_id, 
-                                                client_secret = client_secret, 
-                                                redirect_uri = 'http://localhost/', 
-                                                scope = 'user-library-read'))
-
-    #* Parametres
-    last_liked_track = 'FALSE'
-    limit_liked_track = 50
-    offset_liked_track = 0
-    old_results_liked_track = sp.current_user_saved_tracks()
-    last_id_liked_track = (old_results_liked_track['total']-1)
-
-    #* List of all liked track
-    results_all_liked_track = []
-    while not last_liked_track == 'TRUE' :
-        for item in sp.current_user_saved_tracks(limit_liked_track, offset_liked_track)['items']:
-            results_all_liked_track.append(item)
-            print(item['added_at'] + ' - ' + item['track']['name'] + ' - ALBUM : ' + item['track']['album']['name'] + ' - ARTIST : ' + item['track']['artists'][0]['name'] + ' - ID : ' + item['track']['id'])
-        offset_liked_track = offset_liked_track + limit_liked_track
-        if offset_liked_track >= last_id_liked_track:
-            last_liked_track = 'TRUE'
-
-    return results_all_liked_track
+import Listofy #Ca c'est ton projet
+my_lib = Listofy.load("my_api_token") #Ca charge toutes les tracks depuis ton token
+genres_to_commit = my_lib.playlist_genres() #Ca te sort les playlist pour tes genres
+track_list = my_lib.find_track(artist="my_pattern", album=None, track="another_pattern") #Ca te sort la list des tracks suivant les patterns
+mood_to_commit = my_lib.mood_playlist("my_mood", track_list) #Ca te sort la playlist pour le mood
+my_lib.commit(genres_to_commit)
+my_lib.commit(mood_to_commit)
+#Renvoie les modifs a spotify
 
 
-#* All playlist user
-def results_all_playlist_user(client_id, client_secret):
-    #* Authentification
-    sp = spotipy.Spotify(auth_manager = SpotifyOAuth(client_id = client_id, 
-                                                client_secret = client_secret, 
-                                                redirect_uri = 'http://localhost/', 
-                                                scope = 'playlist-read-private'))
 
-    #* Parametres
-    last_playlist_user = 'FALSE'
-    limit_playlist_user = 50
-    offset_playlist_user = 0
-    old_results_playlist_user = sp.current_user_playlists()
-    last_id_playlist_user = (old_results_playlist_user['total']-1)
+# * Main windows
+def windows_main():
+    #* Windows to update all
+    def windows_update_all():
+        #* Authentification
+        def spotify_authentification():
+            #* Import APP_CLIENT_ID and SECRET
+            f_APP_CLIENT_ID = open('APP_CLIENT_ID.txt', 'r')
+            APP_CLIENT_ID = f_APP_CLIENT_ID.read()
+            f_APP_CLIENT_ID = close
+            f_APP_CLIENT_SECRET = open('APP_CLIENT_SECRET.txt', 'r')
+            APP_CLIENT_SECRET = f_APP_CLIENT_SECRET.read()
+            f_APP_CLIENT_SECRET = close
+            APP_CLIENT_LINK = 'http://localhost/'
+            APP_CLIENT_SCOPE = 'playlist-read-private user-library-read'
+            #* Authentification of API
+            sp = spotipy.Spotify(auth_manager = SpotifyOAuth(client_id = APP_CLIENT_ID, 
+                                                        client_secret = APP_CLIENT_SECRET, 
+                                                        redirect_uri = APP_CLIENT_LINK, 
+                                                        scope = APP_CLIENT_SCOPE))
+            return sp
+        #* All liked track
+        def results_all_liked_track(sp):
+            #* Parametres
+            limit_liked_track = 50
+            offset_liked_track = 0
+            last_liked_track = False
+            old_results_liked_track = sp.current_user_saved_tracks()
+            last_id_liked_track = (old_results_liked_track['total']-1)
+            file_results_all_liked_track = open("results_all_liked_track.txt", "w")
+            file_results_all_liked_track.write('')
+            file_results_all_liked_track.close
+            #* List of all liked track
+            results_all_liked_track = []
+            while not last_liked_track:
+                file_results_all_liked_track = open("results_all_liked_track.txt", "a")
+                for item in sp.current_user_saved_tracks(limit_liked_track, offset_liked_track)['items']:
+                    results_all_liked_track.append(item)
+                    file_results_all_liked_track.write(json.dumps(item) +'\n')
+                    print(item['added_at'] + ' - ' + item['track']['name'] + ' - ALBUM : ' + item['track']['album']['name'] + ' - ARTIST : ' + item['track']['artists'][0]['name'] + ' - ID : ' + item['track']['id'])
+                offset_liked_track = offset_liked_track + limit_liked_track
+                last_liked_track = (offset_liked_track >= last_id_liked_track)
+            file_results_all_liked_track.close
+            return results_all_liked_track
+        #* All playlist user
+        def results_all_playlist_user(sp):
+            #* Parametres
+            last_playlist_user = 'FALSE'
+            limit_playlist_user = 50
+            offset_playlist_user = 0
+            old_results_playlist_user = sp.current_user_playlists()
+            last_id_playlist_user = (old_results_playlist_user['total']-1)
+            #* List of all liked track
+            results_all_playlist_user = []
+            while not last_playlist_user == 'TRUE' :
+                for item in sp.current_user_playlists(limit_playlist_user, offset_playlist_user)['items']:
+                    results_all_playlist_user.append(item)
+                    print(item['name'] + ' - ID : ' + item['id'])
+                offset_playlist_user = offset_playlist_user + limit_playlist_user
+                if offset_playlist_user >= last_id_playlist_user:
+                    last_playlist_user = 'TRUE'
+            return results_all_playlist_user
+        layout = [[sg.Button('Update Spotify info in .txt files'), sg.Exit('Use the .txt files')] ]
+        window = sg.Window('ListoFy update').Layout(layout)
+        
+        while True: 
+            event, values = window.Read()
+            if event in (None, 'Use the .txt files'):
+                try:
+                    file_results_all_liked_track = open("results_all_liked_track.txt", "r")
+                    results_all_liked_track = file_results_all_liked_track.readlines()
+                except:
+                    print('error')
+                break
+            if event == 'Update Spotify info in .txt files':
+                sp = spotify_authentification()
+                results_all_liked_track = results_all_liked_track(sp)
+                results_all_playlist_user = results_all_playlist_user(sp)
+                break
+        window.Close()
+        return results_all_playlist_user, results_all_liked_track
+    results = windows_update_all()
 
-    #* List of all liked track
-    results_all_playlist_user = []
-    while not last_playlist_user == 'TRUE' :
-        for item in sp.current_user_playlists(limit_playlist_user, offset_playlist_user)['items']:
-            results_all_playlist_user.append(item)
-            print(item['name'] + ' - ID : ' + item['id'])
-        offset_playlist_user = offset_playlist_user + limit_playlist_user
-        if offset_playlist_user >= last_id_playlist_user:
-            last_playlist_user = 'TRUE'
+    file_list_column = [
+        [
+            sg.Button(button_text = "Liked"), 
+            sg.Button(button_text = "Playlist", enable_events = True), 
+        ], 
+        [
+            sg.Listbox(
+                values = [], enable_events = True, size = (40, 20), key = "-FILE LIST-"
+            )
+        ], 
+    ]
 
-    return results_all_playlist_user
+    # For now will only show the name of the file that was chosen
+    image_viewer_column = [
+        [sg.Text(size = (40, 1), key = "-TOUT-")], 
+        [sg.Image(key = "-IMAGE-")], 
+    ]
+
+    # --  -- - Full layout --  -- -
+    layout = [
+        [
+            sg.Column(file_list_column), 
+            sg.VSeperator(), 
+            sg.Column(image_viewer_column), 
+        ]
+    ]
+
+    window = sg.Window("Image Viewer", layout)
+
+    # Run the Event Loop
+    while True:
+        event, values = window.read()
+        if event == "Exit" or event == sg.WIN_CLOSED:
+            break
+        # Folder name was filled in, make a list of files in the folder
+        if event == "-FOLDER-":
+            folder = values["-FOLDER-"]
+            try:
+                # Get list of files in folder
+                file_list = os.listdir(folder)
+            except:
+                file_list = []
+
+            fnames = [
+                f
+                for f in file_list
+                if os.path.isfile(os.path.join(folder, f))
+                and f.lower().endswith((".png", ".gif"))
+            ]
+            window["-FILE LIST-"].update(fnames)
+        elif event == "-FILE LIST-":  # A file was chosen from the listbox
+            try:
+                filename = os.path.join(
+                    values["-FOLDER-"], values["-FILE LIST-"][0]
+                )
+                window["-TOUT-"].update(filename)
+                window["-IMAGE-"].update(filename = filename)
+
+            except:
+                pass
+
+    window.close()
 
 
-#* 
-results_all_liked_track=results_all_liked_track(APP_CLIENT_ID, APP_CLIENT_SECRET)
-results_all_playlist_user = results_all_playlist_user(APP_CLIENT_ID, APP_CLIENT_SECRET)
 
-#? A question to chose a "All" Playlist
-''' last_id_playlist_user = 0
+    #* Create an event loop
+    while True:
+        event, values = window.read()
+        # End program if user closes window or
+        # presses the OK button
+        if event == "OK" or event == sg.WIN_CLOSED:
+            break
+
+    window.close()
+
+# * Reload all infos
+
+windows_main()
+
+"""
+last_id_playlist_user = 0
 while not last_id_playlist_user == len(results_all_playlist_user):
     print(str(last_id_playlist_user) + ' - ' + results_all_playlist_user[last_id_playlist_user]['name'] + ' - ID : ' + results_all_playlist_user[last_id_playlist_user]['id'])
-    last_id_playlist_user = last_id_playlist_user+1
+    last_id_playlist_user = last_id_playlist_user+1 
 
-in_playlist_use_all = input('What playlist numbers do you use for "ALL" ? "none" for no playlist : ') '''
+in_playlist_use_all = input('What playlist numbers do you use for "ALL" ? "none" for no playlist : ')
+"""
 
 print('END')
-
