@@ -18,7 +18,6 @@ def windows_main():
 
 
         """
-
         def spotify_authentication():
             # Import APP_CLIENT_ID and SECRET
             f_APP_CLIENT_ID = open('APP_CLIENT_ID.txt', 'r')
