@@ -1,7 +1,7 @@
 WIKI/
 VENV/
-DEBUG/
-/.idea/
+.cache
 APP_CLIENT_ID.txt
 APP_CLIENT_SECRET.txt
-.cache
+results_all_liked_track.txt
+TEST.ipynb 
