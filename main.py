@@ -1,78 +1,68 @@
-
-# * Import
+# Import
 import spotipy
 import json
-import PySimpleGUI as sg
+import PySimpleGUI as SG
 import os.path
-from fileinput import close
 from spotipy.oauth2 import SpotifyOAuth
 
-import Listofy #Ca c'est ton projet
-my_lib = Listofy.load("my_api_token") #Ca charge toutes les tracks depuis ton token
-genres_to_commit = my_lib.playlist_genres() #Ca te sort les playlist pour tes genres
-track_list = my_lib.find_track(artist="my_pattern", album=None, track="another_pattern") #Ca te sort la list des tracks suivant les patterns
-mood_to_commit = my_lib.mood_playlist("my_mood", track_list) #Ca te sort la playlist pour le mood
-my_lib.commit(genres_to_commit)
-my_lib.commit(mood_to_commit)
-#Renvoie les modifs a spotify
 
-
-
-# * Main windows
+# Main windows
 def windows_main():
-    #* Windows to update all
+    # Windows to update all
     def windows_update_all():
-        #* Authentification
+        # TODO - OAUTH to fix if the TXT files not exist
         def spotify_authentification():
-            #* Import APP_CLIENT_ID and SECRET
+            # Import APP_CLIENT_ID and SECRET
             f_APP_CLIENT_ID = open('APP_CLIENT_ID.txt', 'r')
             APP_CLIENT_ID = f_APP_CLIENT_ID.read()
-            f_APP_CLIENT_ID = close
             f_APP_CLIENT_SECRET = open('APP_CLIENT_SECRET.txt', 'r')
             APP_CLIENT_SECRET = f_APP_CLIENT_SECRET.read()
-            f_APP_CLIENT_SECRET = close
             APP_CLIENT_LINK = 'http://localhost/'
             APP_CLIENT_SCOPE = 'playlist-read-private user-library-read'
-            #* Authentification of API
-            sp = spotipy.Spotify(auth_manager = SpotifyOAuth(client_id = APP_CLIENT_ID, 
-                                                        client_secret = APP_CLIENT_SECRET, 
-                                                        redirect_uri = APP_CLIENT_LINK, 
-                                                        scope = APP_CLIENT_SCOPE))
-            return sp
-        #* All liked track
-        def results_all_liked_track(sp):
-            #* Parametres
+            # Authentification of API
+            SPY = spotipy.Spotify(auth_manager=SpotifyOAuth(client_id=APP_CLIENT_ID,
+                                                            client_secret=APP_CLIENT_SECRET,
+                                                            redirect_uri=APP_CLIENT_LINK,
+                                                            scope=APP_CLIENT_SCOPE))
+            return SPY
+
+        # All liked track
+        def results_all_liked_track(SPY):
+            # Parameters
             limit_liked_track = 50
             offset_liked_track = 0
             last_liked_track = False
-            old_results_liked_track = sp.current_user_saved_tracks()
-            last_id_liked_track = (old_results_liked_track['total']-1)
+            old_results_liked_track = SPY.current_user_saved_tracks()
+            last_id_liked_track = (old_results_liked_track['total'] - 1)
             file_results_all_liked_track = open("results_all_liked_track.txt", "w")
             file_results_all_liked_track.write('')
-            file_results_all_liked_track.close
-            #* List of all liked track
+            file_results_all_liked_track.close()
+            # List of all liked track
             results_all_liked_track = []
             while not last_liked_track:
                 file_results_all_liked_track = open("results_all_liked_track.txt", "a")
-                for item in sp.current_user_saved_tracks(limit_liked_track, offset_liked_track)['items']:
+                for item in SPY.current_user_saved_tracks(limit_liked_track, offset_liked_track)['items']:
                     results_all_liked_track.append(item)
-                    file_results_all_liked_track.write(json.dumps(item) +'\n')
-                    print(item['added_at'] + ' - ' + item['track']['name'] + ' - ALBUM : ' + item['track']['album']['name'] + ' - ARTIST : ' + item['track']['artists'][0]['name'] + ' - ID : ' + item['track']['id'])
+                    file_results_all_liked_track.write(json.dumps(item) + '\n')
+                    print(item['added_at'] + ' - ' + item['track']['name'] + ' - ALBUM : ' + item['track']['album'][
+                        'name'] + ' - ARTIST : ' + item['track']['artists'][0]['name'] + ' - ID : ' + item['track'][
+                              'id'])
                 offset_liked_track = offset_liked_track + limit_liked_track
                 last_liked_track = (offset_liked_track >= last_id_liked_track)
-            file_results_all_liked_track.close
+            file_results_all_liked_track.close()
             return results_all_liked_track
-        #* All playlist user
+
+        # All playlist user
         def results_all_playlist_user(sp):
-            #* Parametres
+            # Parameters
             last_playlist_user = 'FALSE'
             limit_playlist_user = 50
             offset_playlist_user = 0
             old_results_playlist_user = sp.current_user_playlists()
-            last_id_playlist_user = (old_results_playlist_user['total']-1)
-            #* List of all liked track
+            last_id_playlist_user = (old_results_playlist_user['total'] - 1)
+            # List of all liked track
             results_all_playlist_user = []
-            while not last_playlist_user == 'TRUE' :
+            while not last_playlist_user == 'TRUE':
                 for item in sp.current_user_playlists(limit_playlist_user, offset_playlist_user)['items']:
                     results_all_playlist_user.append(item)
                     print(item['name'] + ' - ID : ' + item['id'])
@@ -80,10 +70,11 @@ def windows_main():
                 if offset_playlist_user >= last_id_playlist_user:
                     last_playlist_user = 'TRUE'
             return results_all_playlist_user
-        layout = [[sg.Button('Update Spotify info in .txt files'), sg.Exit('Use the .txt files')] ]
-        window = sg.Window('ListoFy update').Layout(layout)
-        
-        while True: 
+
+        layout = [[SG.Button('Update Spotify info in .txt files'), SG.Exit('Use the .txt files')]]
+        window = SG.Window('ListoFy update').Layout(layout)
+
+        while True:
             event, values = window.Read()
             if event in (None, 'Use the .txt files'):
                 try:
@@ -99,41 +90,43 @@ def windows_main():
                 break
         window.Close()
         return results_all_playlist_user, results_all_liked_track
+
     results = windows_update_all()
 
     file_list_column = [
         [
-            sg.Button(button_text = "Liked"), 
-            sg.Button(button_text = "Playlist", enable_events = True), 
-        ], 
+            # TODO - print all Liked or Playlist on the windows
+            SG.Button(button_text="Liked"),
+            SG.Button(button_text="Playlist", enable_events=True),
+        ],
         [
-            sg.Listbox(
-                values = [], enable_events = True, size = (40, 20), key = "-FILE LIST-"
+            SG.Listbox(
+                values=[], enable_events=True, size=(40, 20), key="-FILE LIST-"
             )
-        ], 
+        ],
     ]
 
     # For now will only show the name of the file that was chosen
     image_viewer_column = [
-        [sg.Text(size = (40, 1), key = "-TOUT-")], 
-        [sg.Image(key = "-IMAGE-")], 
+        [SG.Text(size=(40, 1), key="-TOUT-")],
+        [SG.Image(key="-IMAGE-")],
     ]
 
     # --  -- - Full layout --  -- -
     layout = [
         [
-            sg.Column(file_list_column), 
-            sg.VSeperator(), 
-            sg.Column(image_viewer_column), 
+            SG.Column(file_list_column),
+            SG.VSeperator(),
+            SG.Column(image_viewer_column),
         ]
     ]
 
-    window = sg.Window("Image Viewer", layout)
+    window = SG.Window("Image Viewer", layout)
 
     # Run the Event Loop
     while True:
         event, values = window.read()
-        if event == "Exit" or event == sg.WIN_CLOSED:
+        if event == "Exit" or event == SG.WIN_CLOSED:
             break
         # Folder name was filled in, make a list of files in the folder
         if event == "-FOLDER-":
@@ -148,7 +141,7 @@ def windows_main():
                 f
                 for f in file_list
                 if os.path.isfile(os.path.join(folder, f))
-                and f.lower().endswith((".png", ".gif"))
+                   and f.lower().endswith((".png", ".gif"))
             ]
             window["-FILE LIST-"].update(fnames)
         elif event == "-FILE LIST-":  # A file was chosen from the listbox
@@ -157,26 +150,25 @@ def windows_main():
                     values["-FOLDER-"], values["-FILE LIST-"][0]
                 )
                 window["-TOUT-"].update(filename)
-                window["-IMAGE-"].update(filename = filename)
+                window["-IMAGE-"].update(filename=filename)
 
             except:
                 pass
 
     window.close()
 
-
-
-    #* Create an event loop
+    # Create an event loop
     while True:
         event, values = window.read()
         # End program if user closes window or
         # presses the OK button
-        if event == "OK" or event == sg.WIN_CLOSED:
+        if event == "OK" or event == SG.WIN_CLOSED:
             break
 
     window.close()
 
-# * Reload all infos
+
+# Reload all infos
 
 windows_main()
 

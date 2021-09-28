@@ -1,5 +1,7 @@
 WIKI/
-
+VENV/
+DEBUG/
+/.idea/
 APP_CLIENT_ID.txt
 APP_CLIENT_SECRET.txt
 .cache
