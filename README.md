@@ -8,8 +8,6 @@ Organize your playlist by genre / artists / moods and mark the best of them
 
 # CHANGELOG
 
----
-
 ### V0.2.x
 
 - #### V0.2.1
